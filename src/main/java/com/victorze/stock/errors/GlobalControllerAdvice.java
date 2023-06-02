@@ -12,22 +12,24 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ApiError> handlerProductNotFound(ProductNotFoundException ex) {
-        var apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+    public ResponseEntity<?> handleProductNotFound(ProductNotFoundException ex) {
+        return createErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(CategoryNotFoundException.class)
-    public ResponseEntity<ApiError> handlerCategoryNotFound(CategoryNotFoundException ex) {
-        var apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(apiError);
+    public ResponseEntity<?> handleCategoryNotFound(CategoryNotFoundException ex) {
+        return createErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(
-            Exception ex, Object body, HttpHeaders headers, HttpStatusCode statusCode, WebRequest request) {
-        var apiError = new ApiError(statusCode, ex.getMessage());
-        return ResponseEntity.status(statusCode).headers(headers).body(apiError);
+            Exception ex, Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return createErrorResponse(status, ex.getMessage());
+    }
+
+    private ResponseEntity<Object> createErrorResponse(HttpStatusCode statusCode, String message) {
+        ApiError apiError = new ApiError(statusCode, message);
+        return ResponseEntity.status(statusCode).body(apiError);
     }
 
 }
