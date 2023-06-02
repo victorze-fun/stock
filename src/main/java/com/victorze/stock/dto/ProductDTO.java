@@ -8,7 +8,9 @@ import lombok.Setter;
 public class ProductDTO {
 
     private String name;
+
     private double price;
+
     private String categoryName;
 
 }

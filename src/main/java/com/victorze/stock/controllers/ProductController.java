@@ -19,11 +19,16 @@ import com.victorze.stock.errors.ProductNotFoundException;
 import com.victorze.stock.models.Product;
 import com.victorze.stock.repositories.ProductRepository;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
+@Tag(name = "Productos", description = "Product details that will appear in the UI")
 public class ProductController {
 
     private final ProductRepository productRepository;
@@ -37,6 +42,11 @@ public class ProductController {
                 .toList();
     }
 
+    @Operation(summary = "Obtener un producto por ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Operación exitosa"),
+            @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @GetMapping("/{id}")
     public Product show(@PathVariable Long id) throws Exception {
         return productRepository.findById(id)
