@@ -10,18 +10,20 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.victorze.stock.dto.CreateProductDTO;
 import com.victorze.stock.dto.ProductDTO;
 import com.victorze.stock.dto.converter.ProductDTOConterver;
+import com.victorze.stock.errors.ProductNotFoundException;
 import com.victorze.stock.models.Product;
 import com.victorze.stock.repositories.ProductRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/products")
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductRepository productRepository;
@@ -36,10 +38,11 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> show(@PathVariable Long id) {
+    public Product show(@PathVariable Long id) throws Exception {
         return productRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                // .orElseThrow(() -> new ProductNotFoundException(id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "No se encontró el producto con id: " + id));
     }
 
     @PostMapping
@@ -50,14 +53,14 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@RequestBody CreateProductDTO body, @PathVariable Long id) {
+    public Product update(@RequestBody CreateProductDTO body, @PathVariable Long id) {
         return productRepository.findById(id)
                 .map(_p -> {
                     var product = productDTOConterver.convertToProduct(body);
                     product.setId(id);
-                    return ResponseEntity.ok(productRepository.save(product));
+                    return productRepository.save(product);
                 })
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @DeleteMapping("/{id}")
